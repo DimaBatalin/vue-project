@@ -8,8 +8,16 @@
     <div class="posts">
       <h2>Список постов</h2> 
 
+      <input 
+        v-model="searchString"
+        type="text" 
+        placeholder="Поиск постов" 
+        style="margin-bottom: 20px;"
+      >
+
       <Post-list
-        :posts="posts"
+        @delete-post="deletePost"
+        :posts="searchedPost"
       ></Post-list>  
     </div>
 
@@ -31,6 +39,7 @@
 <script>
 import PostList from "./components/PostList.vue"
 import PostForm from "./components/PostForm.vue"
+import axios from "axios"
 
 export default {
   name: "App",
@@ -41,36 +50,53 @@ export default {
     return {
       title: "",
       text: "",
-      likes: 0,
-      dislikes: 0,
-      posts: [
-                {
-                    id: 1,
-                    title: "Пост №1",
-                    body: "Текст поста №1",
-                },
-                {
-                    id: 2,
-                    title: "Пост №2",
-                    body: "Текст поста №2",
-                },
-            ],
-        };
-    },
-    methods: {
-        addLike() {
-            this.likes += 1;
-        },
-        addDislike() {
-            this.dislikes += 1;
-          },
-        addPost(post) {
-          this.posts.push(post);
-        },
-        deletePost(index) {
-            this.posts.splice(index, 1);
+      posts: [],
+      searchString: "",
+    };
+  },
+  computed: {
+    searchedPost() {
+      const sortedPosts = []
+      for (const post of this.posts){
+        if (post.title.includes(this.searchString)){
+          sortedPosts.push(post)
         }
+      }
+      return sortedPosts
     },
+  },
+  methods: {
+    // addLike() {
+    //     this.likes += 1;
+    // },
+    // addDislike() {
+    //     this.dislikes += 1;
+    //   },
+    addPost(post) {
+      this.posts.push({
+        ...post
+      });
+    },
+    deletePost(index, text) {
+      // console.log(index, text)
+      console.log(text);
+      this.posts.splice(index, 1);
+    }, 
+    async getPosts() {
+      const url = "https://jsonplaceholder.typicode.com/posts"
+      try {
+        const response = await axios.get(url)
+        console.log(response.data);
+        this.posts = response.data
+      } catch (error) {
+        console.log("ОШИБКА");
+        console.log(error);
+      }
+    },
+  },
+  async created() {
+    await this.getPosts()
+  },
     
 }
 </script>
