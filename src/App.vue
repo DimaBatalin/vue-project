@@ -8,6 +8,7 @@
     <div class="posts">
       <h2>Список постов</h2> 
 
+
       <input 
         v-model="searchString"
         type="text" 
@@ -15,9 +16,21 @@
         style="margin-bottom: 20px;"
       >
 
+      <select
+        v-model="sortType"
+        style="margin-botton: "
+      >
+        <option>Выберете тип сортировки</option>
+
+        <option>По названию</option>
+
+        <option>По содержанию </option>
+
+      </select>
+
       <Post-list
         @delete-post="deletePost"
-        :posts="searchedPost"
+        :posts="searchAndSortedPosts"
       ></Post-list>  
     </div>
 
@@ -33,6 +46,7 @@
       <button class="like" @click="addLike">Лайк</button>
       <button class="dislike" @click="addDislike">Дизлайк</button>
     </div> -->
+
   </div>
 </template>
 
@@ -52,10 +66,11 @@ export default {
       text: "",
       posts: [],
       searchString: "",
+      sortType: "Выберете тип сортировки",
     };
   },
   computed: {
-    searchedPost() {
+    searchedPosts() {
       const sortedPosts = []
       for (const post of this.posts){
         if (post.title.includes(this.searchString)){
@@ -64,6 +79,22 @@ export default {
       }
       return sortedPosts
     },
+    searchAndSortedPosts () {
+      const searchedPostsCopy = [...this.searchedPosts]
+      if (this.sortType=="По названию") {
+        return searchedPostsCopy.sort((post1, post2) => {
+          return post1.title.localeCompare(post2.title)
+        })
+      } 
+      else if (this.sortType == "По содержанию"){
+        return searchedPostsCopy.sort((post1, post2) => {
+          return post1.body.localeCompare(post2.body)
+        })
+      } 
+      else {
+        return searchedPostsCopy
+      }
+    }
   },
   methods: {
     // addLike() {
@@ -94,10 +125,41 @@ export default {
       }
     },
   },
+  watch: {
+    // sortType(newValue, oldValue) {
+    //   console.log(`значение sortType изменилось с ${oldValue} на ${newValue}`)
+    //   if (newValue=="По названию") {
+    //     this.posts = this.posts.sort((post1, post2) => {
+    //       return post1.title > post2.title
+    //     })
+    //     console.log("1");
+    //   } 
+    //   else if (newValue == "По содержанию"){
+    //     this.posts = this.posts.sort((post1, post2) => {
+    //       return post1.body > post2.body
+    //     })
+    //   } 
+    // }
+    
+  },
   async created() {
+    console.log('created');
     await this.getPosts()
   },
-    
+  mounted() {
+    console.log("mounted");
+  },
+  beforeUpdate() {
+    console.log("beforeUpdate");
+  },
+  updated() {
+    console.log("updated");
+  },
+  beforeDestroy() {
+    // alert("Компонент сейчас умрет")
+  },
+
+
 }
 </script>
 
